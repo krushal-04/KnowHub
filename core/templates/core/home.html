@@ -1,0 +1,141 @@
+{% extends 'core/base.html' %}
+{% block title %}Home — KnowledgeShare{% endblock %}
+{% block content %}
+
+<!-- HERO -->
+<section style="padding:64px 0 52px;text-align:center;position:relative;overflow:hidden;">
+  <div style="position:absolute;top:-120px;left:50%;transform:translateX(-50%);width:700px;height:500px;background:radial-gradient(ellipse,rgba(0,212,170,0.05) 0%,transparent 70%);pointer-events:none;"></div>
+  <div class="container" style="position:relative;">
+    <div style="display:inline-flex;align-items:center;gap:7px;background:rgba(0,212,170,0.09);border:1px solid rgba(0,212,170,0.22);border-radius:999px;padding:5px 14px;font-size:0.8rem;color:var(--teal);font-weight:600;margin-bottom:22px;">
+      ✨ Free Knowledge Sharing Platform
+    </div>
+    <h1 style="font-family:'Syne',sans-serif;font-size:clamp(2rem,5.5vw,3.6rem);font-weight:800;line-height:1.08;margin-bottom:18px;">
+      Share What You <span style="color:var(--teal);">Know</span>,<br>Learn What You <span style="color:var(--amber);">Don't</span>
+    </h1>
+    <p style="color:var(--text2);font-size:1.05rem;max-width:540px;margin:0 auto 32px;line-height:1.7;">
+      Upload study notes, technical guides, and business insights. Download and discover resources shared by the community.
+    </p>
+    <!-- Search -->
+    <form method="GET" action="{% url 'document_list' %}" style="max-width:500px;margin:0 auto 28px;">
+      <div style="display:flex;background:var(--surface);border:1px solid var(--border2);border-radius:999px;overflow:hidden;transition:var(--t);">
+        <input type="text" name="q" value="{{ query }}" placeholder="Search documents, topics, authors…"
+          style="flex:1;padding:12px 20px;background:transparent;border:none;color:var(--text);font-size:0.9rem;font-family:'DM Sans',sans-serif;outline:none;"/>
+        <button type="submit" style="padding:10px 22px;background:var(--teal);border:none;color:#0b0f1c;font-weight:700;font-size:0.875rem;cursor:pointer;font-family:'DM Sans',sans-serif;border-radius:0 999px 999px 0;">Search</button>
+      </div>
+    </form>
+    <div class="flex items-center gap-3" style="justify-content:center;flex-wrap:wrap;">
+      <a href="{% url 'document_list' %}" class="btn btn-secondary">Browse All Documents</a>
+      {% if user.is_authenticated %}
+      <a href="{% url 'document_upload' %}" class="btn btn-primary">+ Upload Document</a>
+      {% else %}
+      <a href="{% url 'register' %}" class="btn btn-primary">Join Free →</a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section style="padding:0 0 44px;">
+  <div class="container">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:28px 40px;display:flex;justify-content:center;gap:0;flex-wrap:wrap;">
+      <div style="text-align:center;padding:0 40px;border-right:1px solid var(--border);">
+        <div style="font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--teal);">{{ total_docs }}</div>
+        <div style="font-size:0.78rem;color:var(--text3);margin-top:3px;">Documents Shared</div>
+      </div>
+      <div style="text-align:center;padding:0 40px;border-right:1px solid var(--border);">
+        <div style="font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--amber);">{{ total_users }}</div>
+        <div style="font-size:0.78rem;color:var(--text3);margin-top:3px;">Members</div>
+      </div>
+      <div style="text-align:center;padding:0 40px;">
+        <div style="font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--blue);">{{ total_categories }}</div>
+        <div style="font-size:0.78rem;color:var(--text3);margin-top:3px;">Categories</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+{% if categories %}
+<section style="padding:0 0 48px;">
+  <div class="container">
+    <div class="flex items-center justify-between mb-3">
+      <h2 style="font-family:'Syne',sans-serif;font-size:1.35rem;font-weight:700;">Browse by Category</h2>
+      <a href="{% url 'document_list' %}" class="btn btn-ghost btn-sm">All →</a>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;">
+      {% for cat in categories %}
+      <a href="{% url 'category_detail' cat.pk %}"
+        style="display:inline-flex;align-items:center;gap:7px;padding:8px 16px;background:var(--surface);border:1px solid var(--border);border-radius:999px;color:var(--text2);font-size:0.855rem;font-weight:500;transition:var(--t);"
+        onmouseover="this.style.borderColor='rgba(0,212,170,0.35)';this.style.color='var(--teal)'"
+        onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text2)'">
+        {{ cat.icon }} {{ cat.name }}
+        <span style="background:var(--teal-dim);color:var(--teal);padding:0 7px;border-radius:999px;font-size:0.7rem;font-weight:700;">{{ cat.document_count }}</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- RECENT DOCUMENTS -->
+<section style="padding:0 0 64px;">
+  <div class="container">
+    <div class="flex items-center justify-between mb-3">
+      <h2 style="font-family:'Syne',sans-serif;font-size:1.35rem;font-weight:700;">Recent Documents</h2>
+      <a href="{% url 'document_list' %}" class="btn btn-ghost btn-sm">View All →</a>
+    </div>
+    {% if recent_docs %}
+    <div class="grid-3">
+      {% for doc in recent_docs %}
+      <a href="{% url 'document_detail' doc.pk %}" style="text-decoration:none;">
+        <div class="doc-card card-hover">
+          <div class="doc-card-body">
+            <div class="doc-icon di-{{ doc.get_file_extension }}">{{ doc.get_file_icon }}</div>
+            {% if doc.category %}<div class="mb-2"><span class="tag">{{ doc.category.icon }} {{ doc.category.name }}</span></div>{% endif %}
+            <div class="doc-title">{{ doc.title }}</div>
+            <div class="doc-desc">{{ doc.description }}</div>
+          </div>
+          <div class="doc-card-foot">
+            <div class="flex items-center gap-2">
+              <div class="av" style="width:22px;height:22px;font-size:0.65rem;">{{ doc.uploader.username|first }}</div>
+              <span style="font-size:0.76rem;color:var(--text3);">{{ doc.uploader.username }}</span>
+            </div>
+            <div class="meta"><span>⬇ {{ doc.download_count }}</span><span>💬 {{ doc.comment_count }}</span></div>
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty card">
+      <div class="ei">📭</div>
+      <h3>No documents yet</h3>
+      <p>Be the first to share your knowledge!</p>
+      {% if user.is_authenticated %}
+      <a href="{% url 'document_upload' %}" class="btn btn-primary mt-2">Upload Now</a>
+      {% else %}
+      <a href="{% url 'register' %}" class="btn btn-primary mt-2">Join & Upload</a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- CTA (guests only) -->
+{% if not user.is_authenticated %}
+<section style="padding:0 0 64px;">
+  <div class="container">
+    <div style="background:linear-gradient(135deg,var(--surface),var(--bg3));border:1px solid rgba(0,212,170,0.18);border-radius:var(--r);padding:52px 40px;text-align:center;position:relative;overflow:hidden;">
+      <div style="position:absolute;top:-50px;right:-50px;width:180px;height:180px;background:radial-gradient(circle,rgba(0,212,170,0.07),transparent);border-radius:50%;"></div>
+      <h2 style="font-family:'Syne',sans-serif;font-size:1.8rem;margin-bottom:10px;">Ready to Share Your Knowledge?</h2>
+      <p style="color:var(--text2);margin-bottom:26px;max-width:440px;margin-left:auto;margin-right:auto;">Join the community — upload documents, comment, and discover resources. Completely free.</p>
+      <div class="flex gap-3" style="justify-content:center;flex-wrap:wrap;">
+        <a href="{% url 'register' %}" class="btn btn-primary btn-lg">Create Free Account</a>
+        <a href="{% url 'login' %}"    class="btn btn-secondary btn-lg">Sign In</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% endblock %}

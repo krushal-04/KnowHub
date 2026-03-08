@@ -1,0 +1,99 @@
+{% extends 'core/base.html' %}
+{% block title %}Browse Documents — KnowledgeShare{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header flex items-center justify-between" style="flex-wrap:wrap;gap:14px;">
+    <div>
+      <h1 class="page-title">Browse Documents</h1>
+      <p class="page-sub">{{ total_count }} document{{ total_count|pluralize }} found{% if query %} for "<strong>{{ query }}</strong>"{% endif %}</p>
+    </div>
+    {% if user.is_authenticated %}<a href="{% url 'document_upload' %}" class="btn btn-primary">+ Upload</a>{% endif %}
+  </div>
+
+  <div class="with-sidebar">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-box">
+        <div class="sidebar-title">Search</div>
+        <form method="GET">
+          <input type="text" name="q" value="{{ query }}" placeholder="Search…" class="form-input" style="margin-bottom:8px;"/>
+          {% if cat_id %}<input type="hidden" name="category" value="{{ cat_id }}"/>{% endif %}
+          <button type="submit" class="btn btn-primary btn-sm btn-block">Search</button>
+        </form>
+      </div>
+      <div class="sidebar-box">
+        <div class="sidebar-title">Category</div>
+        <a href="{% url 'document_list' %}{% if query %}?q={{ query }}{% endif %}"
+          style="display:flex;align-items:center;justify-content:space-between;padding:7px 9px;border-radius:var(--r-sm);font-size:0.855rem;margin-bottom:3px;transition:var(--t);{% if not cat_id %}background:var(--teal-dim);color:var(--teal);{% else %}color:var(--text2);{% endif %}">
+          <span>🗂 All</span>
+        </a>
+        {% for cat in categories %}
+        <a href="?{% if query %}q={{ query }}&{% endif %}category={{ cat.pk }}"
+          style="display:flex;align-items:center;justify-content:space-between;padding:7px 9px;border-radius:var(--r-sm);font-size:0.855rem;margin-bottom:3px;transition:var(--t);{% if cat_id == cat.pk|stringformat:'s' %}background:var(--teal-dim);color:var(--teal);{% else %}color:var(--text2);{% endif %}"
+          onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background={% if cat_id == cat.pk|stringformat:'s' %}'var(--teal-dim)'{% else %}'transparent'{% endif %}">
+          <span>{{ cat.icon }} {{ cat.name }}</span>
+          <span style="font-size:0.7rem;color:var(--text3);">{{ cat.document_count }}</span>
+        </a>
+        {% endfor %}
+      </div>
+      <div class="sidebar-box">
+        <div class="sidebar-title">Sort By</div>
+        <form method="GET">
+          {% if query %}<input type="hidden" name="q" value="{{ query }}"/>{% endif %}
+          {% if cat_id %}<input type="hidden" name="category" value="{{ cat_id }}"/>{% endif %}
+          <select name="sort" class="form-input" onchange="this.form.submit()">
+            <option value="-uploaded_at" {% if sort == '-uploaded_at' %}selected{% endif %}>Newest First</option>
+            <option value="uploaded_at"  {% if sort == 'uploaded_at'  %}selected{% endif %}>Oldest First</option>
+            <option value="title"        {% if sort == 'title'        %}selected{% endif %}>Title A–Z</option>
+            <option value="-download_count" {% if sort == '-download_count' %}selected{% endif %}>Most Downloaded</option>
+          </select>
+        </form>
+      </div>
+    </aside>
+
+    <!-- Grid -->
+    <div>
+      {% if page_obj %}
+      <div class="grid-3">
+        {% for doc in page_obj %}
+        <a href="{% url 'document_detail' doc.pk %}" style="text-decoration:none;">
+          <div class="doc-card card-hover">
+            <div class="doc-card-body">
+              <div class="doc-icon di-{{ doc.get_file_extension }}">{{ doc.get_file_icon }}</div>
+              {% if doc.category %}<div class="mb-2"><span class="tag">{{ doc.category.icon }} {{ doc.category.name }}</span></div>{% endif %}
+              <div class="doc-title">{{ doc.title }}</div>
+              <div class="doc-desc">{{ doc.description }}</div>
+              <div class="meta mt-1"><span>📅 {{ doc.uploaded_at|date:"M d, Y" }}</span><span>📦 {{ doc.get_file_size }}</span></div>
+            </div>
+            <div class="doc-card-foot">
+              <div class="flex items-center gap-2">
+                <div class="av" style="width:22px;height:22px;font-size:0.65rem;">{{ doc.uploader.username|first }}</div>
+                <span style="font-size:0.76rem;color:var(--text3);">{{ doc.uploader.username }}</span>
+              </div>
+              <div class="meta"><span>⬇ {{ doc.download_count }}</span><span>💬 {{ doc.comment_count }}</span></div>
+            </div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      {% if page_obj.has_other_pages %}
+      <div class="pagination">
+        {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if cat_id %}&category={{ cat_id }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" class="pg-btn">‹</a>{% endif %}
+        {% for num in page_obj.paginator.page_range %}
+          {% if page_obj.number == num %}<span class="pg-btn current">{{ num }}</span>
+          {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}<a href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if cat_id %}&category={{ cat_id }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" class="pg-btn">{{ num }}</a>{% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if cat_id %}&category={{ cat_id }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" class="pg-btn">›</a>{% endif %}
+      </div>
+      {% endif %}
+      {% else %}
+      <div class="empty card">
+        <div class="ei">🔍</div>
+        <h3>No documents found</h3>
+        <p><a href="{% url 'document_list' %}">Clear filters</a> or upload something new.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

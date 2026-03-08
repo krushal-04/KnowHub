@@ -1,0 +1,72 @@
+{% extends 'core/base.html' %}
+{% block title %}My Profile — KnowledgeShare{% endblock %}
+{% block content %}
+<div class="container" style="padding-top:32px;padding-bottom:48px;">
+  <div style="display:grid;grid-template-columns:300px 1fr;gap:28px;align-items:start;">
+
+    <div>
+      <div class="card" style="text-align:center;padding:28px;margin-bottom:18px;">
+        <div class="av av-xl" style="margin:0 auto 14px;">{{ user.username|first }}</div>
+        <h2 style="font-family:'Syne',sans-serif;font-size:1.3rem;margin-bottom:4px;">{{ user.get_full_name|default:user.username }}</h2>
+        <div style="color:var(--text3);font-size:0.855rem;margin-bottom:18px;">@{{ user.username }}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:14px;background:var(--bg2);border-radius:var(--r-sm);">
+          <div><div style="font-size:1.45rem;font-weight:800;font-family:'Syne',sans-serif;color:var(--teal);">{{ documents.count }}</div><div style="font-size:0.73rem;color:var(--text3);">Documents</div></div>
+          <div><div style="font-size:1.45rem;font-weight:800;font-family:'Syne',sans-serif;color:var(--amber);">{{ total_downloads }}</div><div style="font-size:0.73rem;color:var(--text3);">Downloads</div></div>
+        </div>
+        <div style="margin-top:12px;font-size:0.76rem;color:var(--text3);">Member since {{ user.date_joined|date:"M Y" }}</div>
+      </div>
+
+      <div class="card" style="padding:22px;">
+        <h3 style="font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:700;margin-bottom:18px;">Edit Profile</h3>
+        <form method="POST" novalidate>
+          {% csrf_token %}
+          <div class="form-group"><label class="form-label">First Name</label>{{ form.first_name }}</div>
+          <div class="form-group"><label class="form-label">Last Name</label>{{ form.last_name }}</div>
+          <div class="form-group">
+            <label class="form-label">Email</label>{{ form.email }}
+            {% for e in form.email.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+          </div>
+          <button type="submit" class="btn btn-primary btn-sm btn-block">Save Changes</button>
+        </form>
+      </div>
+    </div>
+
+    <div>
+      <div class="flex items-center justify-between mb-3">
+        <h2 style="font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:700;">My Documents</h2>
+        <a href="{% url 'my_documents' %}" class="btn btn-ghost btn-sm">Manage All →</a>
+      </div>
+      {% if documents %}
+      <div class="grid-3">
+        {% for doc in documents %}
+        <a href="{% url 'document_detail' doc.pk %}" style="text-decoration:none;">
+          <div class="doc-card card-hover">
+            <div class="doc-card-body">
+              <div class="doc-icon di-{{ doc.get_file_extension }}">{{ doc.get_file_icon }}</div>
+              {% if doc.category %}<div class="mb-2"><span class="tag">{{ doc.category.icon }} {{ doc.category.name }}</span></div>{% endif %}
+              <div class="doc-title">{{ doc.title }}</div>
+            </div>
+            <div class="doc-card-foot">
+              <span style="font-size:0.76rem;color:var(--text3);">{{ doc.uploaded_at|date:"M d, Y" }}</span>
+              <div class="meta"><span>⬇ {{ doc.download_count }}</span></div>
+            </div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty card">
+        <div class="ei">📂</div><h3>No documents yet</h3>
+        <a href="{% url 'document_upload' %}" class="btn btn-primary mt-3">Upload First Document</a>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+{% block extra_css %}
+<style>
+@media(max-width:860px){.container > div {grid-template-columns:1fr !important;}}
+</style>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends 'core/base.html' %}
+{% block title %}Create Account — KnowledgeShare{% endblock %}
+{% block content %}
+<div style="min-height:78vh;display:flex;align-items:center;justify-content:center;padding:40px 24px;">
+  <div style="width:100%;max-width:450px;">
+    <div style="text-align:center;margin-bottom:32px;">
+      <div style="width:56px;height:56px;background:linear-gradient(135deg,var(--teal),var(--blue));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.7rem;margin:0 auto 14px;">📚</div>
+      <h1 style="font-family:'Syne',sans-serif;font-size:1.75rem;font-weight:800;margin-bottom:5px;">Create your account</h1>
+      <p style="color:var(--text2);">Join the knowledge sharing community</p>
+    </div>
+    <div class="card" style="padding:30px;">
+      <form method="POST" novalidate>
+        {% csrf_token %}
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          {{ form.username }}
+          {% for e in form.username.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          {{ form.email }}
+          {% for e in form.email.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          {{ form.password1 }}
+          {% for e in form.password1.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirm Password</label>
+          {{ form.password2 }}
+          {% for e in form.password2.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+        </div>
+        {% if form.non_field_errors %}<div class="alert alert-error">{{ form.non_field_errors }}</div>{% endif %}
+        <button type="submit" class="btn btn-primary btn-block" style="padding:12px;margin-top:6px;">Create Account →</button>
+      </form>
+      <hr class="sep"/>
+      <p style="text-align:center;color:var(--text2);font-size:0.875rem;">Already have an account? <a href="{% url 'login' %}">Sign in</a></p>
+    </div>
+  </div>
+</div>
+{% endblock %}

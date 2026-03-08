@@ -1,0 +1,41 @@
+{% extends 'core/base.html' %}
+{% block title %}{{ profile_user.username }} — KnowledgeShare{% endblock %}
+{% block content %}
+<div class="container" style="padding-top:32px;padding-bottom:48px;">
+  <div class="card" style="padding:32px;margin-bottom:28px;display:flex;align-items:center;gap:22px;flex-wrap:wrap;">
+    <div class="av av-xl">{{ profile_user.username|first }}</div>
+    <div>
+      <h1 style="font-family:'Syne',sans-serif;font-size:1.9rem;font-weight:800;margin-bottom:4px;">{{ profile_user.get_full_name|default:profile_user.username }}</h1>
+      <div style="color:var(--text3);margin-bottom:14px;">@{{ profile_user.username }} · Member since {{ profile_user.date_joined|date:"M Y" }}</div>
+      <div class="flex gap-4">
+        <div><span style="font-family:'Syne',sans-serif;font-size:1.45rem;font-weight:800;color:var(--teal);">{{ documents.count }}</span><span style="font-size:0.83rem;color:var(--text3);margin-left:5px;">Documents</span></div>
+        <div><span style="font-family:'Syne',sans-serif;font-size:1.45rem;font-weight:800;color:var(--amber);">{{ total_downloads }}</span><span style="font-size:0.83rem;color:var(--text3);margin-left:5px;">Downloads</span></div>
+      </div>
+    </div>
+  </div>
+
+  <h2 style="font-family:'Syne',sans-serif;font-size:1.2rem;margin-bottom:18px;">Shared Documents</h2>
+  {% if documents %}
+  <div class="grid-3">
+    {% for doc in documents %}
+    <a href="{% url 'document_detail' doc.pk %}" style="text-decoration:none;">
+      <div class="doc-card card-hover">
+        <div class="doc-card-body">
+          <div class="doc-icon di-{{ doc.get_file_extension }}">{{ doc.get_file_icon }}</div>
+          {% if doc.category %}<div class="mb-2"><span class="tag">{{ doc.category.icon }} {{ doc.category.name }}</span></div>{% endif %}
+          <div class="doc-title">{{ doc.title }}</div>
+          <div class="doc-desc">{{ doc.description }}</div>
+        </div>
+        <div class="doc-card-foot">
+          <span style="font-size:0.76rem;color:var(--text3);">{{ doc.uploaded_at|date:"M d, Y" }}</span>
+          <div class="meta"><span>⬇ {{ doc.download_count }}</span><span>💬 {{ doc.comment_count }}</span></div>
+        </div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty card"><div class="ei">📂</div><h3>No documents yet</h3></div>
+  {% endif %}
+</div>
+{% endblock %}

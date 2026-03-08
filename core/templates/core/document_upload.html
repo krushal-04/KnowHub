@@ -1,0 +1,56 @@
+{% extends 'core/base.html' %}
+{% block title %}Upload Document — KnowledgeShare{% endblock %}
+{% block content %}
+<div class="container">
+  <div style="max-width:660px;margin:0 auto;">
+    <div class="page-header">
+      <h1 class="page-title">Upload Document</h1>
+      <p class="page-sub">Share your knowledge. Supported: PDF, Word, Excel, PowerPoint, TXT (max 20 MB)</p>
+    </div>
+    <div class="card" style="padding:32px;">
+      <form method="POST" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        <div class="form-group">
+          <label class="form-label">Title *</label>
+          {{ form.title }}
+          {% for e in form.title.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category *</label>
+          {{ form.category }}
+          {% for e in form.category.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description *</label>
+          {{ form.description }}
+          {% for e in form.description.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">File *</label>
+          <input type="file" name="file" id="fileInput" class="file-input" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"/>
+          <label for="fileInput" class="file-label">
+            <span class="file-icon-big">📎</span>
+            <div>
+              <div style="font-weight:600;" class="file-text">Click to choose a file</div>
+              <div style="font-size:0.76rem;color:var(--text3);margin-top:2px;">PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT — max 20 MB</div>
+            </div>
+          </label>
+          {% for e in form.file.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+        </div>
+        <div class="flex gap-3 mt-3">
+          <button type="submit" class="btn btn-primary btn-lg">🚀 Upload Document</button>
+          <a href="{% url 'document_list' %}" class="btn btn-ghost btn-lg">Cancel</a>
+        </div>
+      </form>
+    </div>
+    <div style="margin-top:20px;padding:16px 18px;background:rgba(0,212,170,0.05);border:1px solid rgba(0,212,170,0.14);border-radius:var(--r);">
+      <div style="font-size:0.8rem;font-weight:700;color:var(--teal);margin-bottom:8px;">📋 Upload Guidelines</div>
+      <div style="font-size:0.82rem;color:var(--text2);display:flex;flex-direction:column;gap:4px;">
+        <div>✅ Only upload content you own or have rights to share</div>
+        <div>✅ Choose the most relevant category</div>
+        <div>❌ No copyrighted or inappropriate content</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

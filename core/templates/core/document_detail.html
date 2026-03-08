@@ -1,0 +1,164 @@
+{% extends 'core/base.html' %}
+{% block title %}{{ document.title }} — KnowledgeShare{% endblock %}
+{% block content %}
+<div class="container" style="padding-top:28px;padding-bottom:48px;">
+  <!-- Breadcrumb -->
+  <div style="font-size:0.8rem;color:var(--text3);margin-bottom:22px;">
+    <a href="{% url 'home' %}" style="color:var(--text3);">Home</a> /
+    <a href="{% url 'document_list' %}" style="color:var(--text3);">Documents</a> /
+    {% if document.category %}<a href="{% url 'category_detail' document.category.pk %}" style="color:var(--text3);">{{ document.category.name }}</a> / {% endif %}
+    <span>{{ document.title|truncatechars:35 }}</span>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 300px;gap:28px;align-items:start;">
+
+    <!-- Main -->
+    <div>
+      <!-- Doc header card -->
+      <div class="card" style="margin-bottom:22px;">
+        <div class="flex gap-3" style="margin-bottom:18px;flex-wrap:wrap;">
+          <div class="doc-icon di-{{ document.get_file_extension }}" style="width:52px;height:52px;font-size:1.5rem;">{{ document.get_file_icon }}</div>
+          <div style="flex:1;">
+            {% if document.category %}<div style="margin-bottom:6px;"><span class="tag">{{ document.category.icon }} {{ document.category.name }}</span></div>{% endif %}
+            <h1 style="font-family:'Syne',sans-serif;font-size:1.65rem;font-weight:800;line-height:1.2;">{{ document.title }}</h1>
+          </div>
+        </div>
+        <p style="color:var(--text2);line-height:1.75;margin-bottom:22px;">{{ document.description }}</p>
+
+        <!-- Meta grid -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px;padding:18px;background:var(--bg2);border-radius:var(--r-sm);margin-bottom:22px;">
+          <div>
+            <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:4px;">Uploaded by</div>
+            <a href="{% url 'public_profile' document.uploader.username %}" class="flex items-center gap-2" style="color:var(--text);">
+              <div class="av" style="width:22px;height:22px;font-size:0.65rem;">{{ document.uploader.username|first }}</div>
+              <span style="font-size:0.875rem;font-weight:600;">{{ document.uploader.username }}</span>
+            </a>
+          </div>
+          <div>
+            <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:4px;">Date</div>
+            <div style="font-size:0.875rem;font-weight:600;">{{ document.uploaded_at|date:"M d, Y" }}</div>
+          </div>
+          <div>
+            <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:4px;">File Size</div>
+            <div style="font-size:0.875rem;font-weight:600;">{{ document.get_file_size }}</div>
+          </div>
+          <div>
+            <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:4px;">Type</div>
+            <div style="font-size:0.875rem;font-weight:600;text-transform:uppercase;">.{{ document.get_file_extension }}</div>
+          </div>
+          <div>
+            <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:4px;">Downloads</div>
+            <div style="font-size:0.875rem;font-weight:600;color:var(--teal);">{{ document.download_count }}</div>
+          </div>
+          <div>
+            <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:4px;">Comments</div>
+            <div style="font-size:0.875rem;font-weight:600;color:var(--amber);">{{ document.comment_count }}</div>
+          </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="flex gap-3" style="flex-wrap:wrap;">
+          {% if user.is_authenticated %}
+          <a href="{% url 'document_download' document.pk %}" class="btn btn-primary btn-lg">⬇ Download File</a>
+          {% else %}
+          <a href="{% url 'login' %}" class="btn btn-primary btn-lg">🔑 Login to Download</a>
+          {% endif %}
+          {% if user == document.uploader %}
+          <a href="{% url 'document_edit' document.pk %}"   class="btn btn-secondary">✏️ Edit</a>
+          <a href="{% url 'document_delete' document.pk %}" class="btn btn-danger">🗑 Delete</a>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Comments -->
+      <div class="card" id="comments">
+        <h2 style="font-family:'Syne',sans-serif;font-size:1.15rem;font-weight:700;margin-bottom:22px;">
+          💬 Comments <span style="color:var(--text3);font-weight:400;font-size:0.9rem;">({{ comments.count }})</span>
+        </h2>
+
+        {% if comments %}
+        <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:28px;">
+          {% for c in comments %}
+          <div style="padding:14px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-sm);">
+            <div class="flex items-center justify-between mb-2">
+              <a href="{% url 'public_profile' c.author.username %}" class="flex items-center gap-2" style="color:var(--text);">
+                <div class="av" style="width:28px;height:28px;font-size:0.75rem;">{{ c.author.username|first }}</div>
+                <span style="font-weight:600;font-size:0.875rem;">{{ c.author.username }}</span>
+                {% if c.author == document.uploader %}<span style="font-size:0.68rem;background:var(--teal-dim);color:var(--teal);padding:1px 7px;border-radius:999px;">Author</span>{% endif %}
+              </a>
+              <div class="flex items-center gap-2">
+                <span style="font-size:0.75rem;color:var(--text3);">{{ c.created_at|timesince }} ago</span>
+                {% if user == c.author or user.is_staff %}
+                <form method="POST" action="{% url 'comment_delete' c.pk %}" onsubmit="return confirm('Delete comment?');">
+                  {% csrf_token %}
+                  <button type="submit" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:0.78rem;padding:2px 5px;border-radius:4px;" onmouseover="this.style.color='var(--coral)'" onmouseout="this.style.color='var(--text3)'">✕</button>
+                </form>
+                {% endif %}
+              </div>
+            </div>
+            <p style="color:var(--text2);font-size:0.89rem;line-height:1.6;">{{ c.content }}</p>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align:center;padding:28px;color:var(--text3);margin-bottom:22px;">
+          <div style="font-size:2rem;margin-bottom:8px;">💬</div>
+          <p>No comments yet. Be the first!</p>
+        </div>
+        {% endif %}
+
+        <!-- Comment form -->
+        {% if user.is_authenticated %}
+        <div style="border-top:1px solid var(--border);padding-top:22px;">
+          <h3 style="font-size:0.9rem;font-weight:600;color:var(--text2);margin-bottom:12px;">Leave a Comment</h3>
+          <form method="POST" action="#comments">
+            {% csrf_token %}
+            {{ comment_form.content }}
+            {% for e in comment_form.content.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+            <button type="submit" class="btn btn-primary mt-2">Post Comment</button>
+          </form>
+        </div>
+        {% else %}
+        <div style="border-top:1px solid var(--border);padding-top:20px;text-align:center;">
+          <p style="color:var(--text2);font-size:0.875rem;"><a href="{% url 'login' %}">Sign in</a> to leave a comment.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div>
+      <div class="sidebar-box card" style="margin-bottom:18px;">
+        <div class="sidebar-title">Uploader</div>
+        <a href="{% url 'public_profile' document.uploader.username %}" class="flex items-center gap-3" style="color:var(--text);">
+          <div class="av av-lg">{{ document.uploader.username|first }}</div>
+          <div>
+            <div style="font-weight:700;">{{ document.uploader.get_full_name|default:document.uploader.username }}</div>
+            <div style="font-size:0.78rem;color:var(--text3);">@{{ document.uploader.username }}</div>
+            <div style="font-size:0.75rem;color:var(--text3);margin-top:2px;">{{ document.uploader.documents.count }} docs</div>
+          </div>
+        </a>
+      </div>
+      {% if related_docs %}
+      <div class="sidebar-box card">
+        <div class="sidebar-title">Related Documents</div>
+        {% for r in related_docs %}
+        <a href="{% url 'document_detail' r.pk %}" style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);transition:var(--t);" onmouseover="this.style.paddingLeft='6px'" onmouseout="this.style.paddingLeft='0'">
+          <div style="font-size:1.3rem;flex-shrink:0;">{{ r.get_file_icon }}</div>
+          <div>
+            <div style="font-size:0.83rem;font-weight:600;color:var(--text);line-height:1.3;">{{ r.title|truncatechars:45 }}</div>
+            <div style="font-size:0.73rem;color:var(--text3);margin-top:2px;">⬇ {{ r.download_count }}</div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_css %}
+<style>
+@media(max-width:860px){ .container > div > div { grid-template-columns:1fr !important; } }
+</style>
+{% endblock %}

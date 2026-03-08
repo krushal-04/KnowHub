@@ -1,0 +1,63 @@
+{% extends 'core/base.html' %}
+{% block title %}My Documents — KnowledgeShare{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header flex items-center justify-between" style="flex-wrap:wrap;gap:14px;">
+    <div>
+      <h1 class="page-title">My Documents</h1>
+      <p class="page-sub">Manage documents you've uploaded.</p>
+    </div>
+    <a href="{% url 'document_upload' %}" class="btn btn-primary">+ Upload New</a>
+  </div>
+
+  <!-- Stats -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;margin-bottom:30px;">
+    <div class="card" style="text-align:center;padding:18px;">
+      <div style="font-family:'Syne',sans-serif;font-size:1.9rem;font-weight:800;color:var(--teal);">{{ documents.count }}</div>
+      <div style="font-size:0.78rem;color:var(--text3);margin-top:3px;">Documents</div>
+    </div>
+    <div class="card" style="text-align:center;padding:18px;">
+      <div style="font-family:'Syne',sans-serif;font-size:1.9rem;font-weight:800;color:var(--amber);">{{ total_downloads }}</div>
+      <div style="font-size:0.78rem;color:var(--text3);margin-top:3px;">Total Downloads</div>
+    </div>
+    <div class="card" style="text-align:center;padding:18px;">
+      <div style="font-family:'Syne',sans-serif;font-size:1.9rem;font-weight:800;color:var(--blue);">{{ total_comments }}</div>
+      <div style="font-size:0.78rem;color:var(--text3);margin-top:3px;">Comments Received</div>
+    </div>
+  </div>
+
+  {% if documents %}
+  <div style="display:flex;flex-direction:column;gap:12px;">
+    {% for doc in documents %}
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;transition:var(--t);"
+      onmouseover="this.style.borderColor='rgba(0,212,170,0.22)'"
+      onmouseout="this.style.borderColor='var(--border)'">
+      <div class="doc-icon di-{{ doc.get_file_extension }}" style="width:42px;height:42px;font-size:1.2rem;flex-shrink:0;">{{ doc.get_file_icon }}</div>
+      <div style="flex:1;min-width:0;">
+        <a href="{% url 'document_detail' doc.pk %}" style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.97rem;color:var(--text);">{{ doc.title }}</a>
+        <div class="meta mt-1">
+          {% if doc.category %}<span class="tag" style="font-size:0.7rem;">{{ doc.category.icon }} {{ doc.category.name }}</span>{% endif %}
+          <span>📅 {{ doc.uploaded_at|date:"M d, Y" }}</span>
+          <span>📦 {{ doc.get_file_size }}</span>
+          <span>⬇ {{ doc.download_count }}</span>
+          <span>💬 {{ doc.comment_count }}</span>
+        </div>
+      </div>
+      <div class="flex gap-2" style="flex-shrink:0;">
+        <a href="{% url 'document_download' doc.pk %}" class="btn btn-ghost btn-sm">⬇</a>
+        <a href="{% url 'document_edit'     doc.pk %}" class="btn btn-secondary btn-sm">✏️ Edit</a>
+        <a href="{% url 'document_delete'   doc.pk %}" class="btn btn-danger btn-sm">🗑</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty card">
+    <div class="ei">📂</div>
+    <h3>No documents yet</h3>
+    <p>Start sharing your knowledge with the community!</p>
+    <a href="{% url 'document_upload' %}" class="btn btn-primary mt-3">Upload First Document</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

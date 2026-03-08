@@ -1,0 +1,19 @@
+{% extends 'core/base.html' %}
+{% block title %}Delete Document{% endblock %}
+{% block content %}
+<div style="min-height:72vh;display:flex;align-items:center;justify-content:center;padding:40px 24px;">
+  <div style="max-width:460px;width:100%;">
+    <div class="card" style="padding:36px;text-align:center;border-color:rgba(255,107,107,0.22);">
+      <div style="font-size:2.8rem;margin-bottom:14px;">🗑️</div>
+      <h2 style="font-family:'Syne',sans-serif;font-size:1.45rem;margin-bottom:10px;">Delete Document?</h2>
+      <p style="color:var(--text2);margin-bottom:8px;">You are about to permanently delete:</p>
+      <div style="padding:10px 14px;background:var(--bg2);border-radius:var(--r-sm);margin-bottom:20px;font-weight:700;">{{ document.title }}</div>
+      <p style="color:var(--text3);font-size:0.83rem;margin-bottom:26px;">This cannot be undone. All comments will also be deleted.</p>
+      <div class="flex gap-3" style="justify-content:center;">
+        <form method="POST">{% csrf_token %}<button type="submit" class="btn btn-danger btn-lg">Yes, Delete</button></form>
+        <a href="{% url 'document_detail' document.pk %}" class="btn btn-secondary btn-lg">Cancel</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

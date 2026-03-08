@@ -1,0 +1,69 @@
+{% extends 'core/base.html' %}
+{% block title %}{{ category.name }} — KnowledgeShare{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <div style="font-size:0.8rem;color:var(--text3);margin-bottom:6px;"><a href="{% url 'home' %}" style="color:var(--text3);">Home</a> / Categories / {{ category.name }}</div>
+    <div class="flex items-center gap-3">
+      <div style="font-size:2.4rem;">{{ category.icon }}</div>
+      <div><h1 class="page-title">{{ category.name }}</h1>{% if category.description %}<p class="page-sub">{{ category.description }}</p>{% endif %}</div>
+    </div>
+  </div>
+
+  <div class="with-sidebar">
+    <aside class="sidebar">
+      <div class="sidebar-box">
+        <div class="sidebar-title">All Categories</div>
+        {% for cat in categories %}
+        <a href="{% url 'category_detail' cat.pk %}"
+          style="display:flex;align-items:center;justify-content:space-between;padding:7px 9px;border-radius:var(--r-sm);font-size:0.855rem;margin-bottom:3px;transition:var(--t);{% if cat.pk == category.pk %}background:var(--teal-dim);color:var(--teal);{% else %}color:var(--text2);{% endif %}"
+          onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background={% if cat.pk == category.pk %}'var(--teal-dim)'{% else %}'transparent'{% endif %}">
+          <span>{{ cat.icon }} {{ cat.name }}</span>
+          <span style="font-size:0.7rem;color:var(--text3);">{{ cat.document_count }}</span>
+        </a>
+        {% endfor %}
+      </div>
+    </aside>
+
+    <div>
+      {% if page_obj %}
+      <div class="grid-3">
+        {% for doc in page_obj %}
+        <a href="{% url 'document_detail' doc.pk %}" style="text-decoration:none;">
+          <div class="doc-card card-hover">
+            <div class="doc-card-body">
+              <div class="doc-icon di-{{ doc.get_file_extension }}">{{ doc.get_file_icon }}</div>
+              <div class="doc-title">{{ doc.title }}</div>
+              <div class="doc-desc">{{ doc.description }}</div>
+            </div>
+            <div class="doc-card-foot">
+              <div class="flex items-center gap-2">
+                <div class="av" style="width:22px;height:22px;font-size:0.65rem;">{{ doc.uploader.username|first }}</div>
+                <span style="font-size:0.76rem;color:var(--text3);">{{ doc.uploader.username }}</span>
+              </div>
+              <div class="meta"><span>⬇ {{ doc.download_count }}</span></div>
+            </div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      {% if page_obj.has_other_pages %}
+      <div class="pagination">
+        {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}" class="pg-btn">‹</a>{% endif %}
+        {% for num in page_obj.paginator.page_range %}
+          {% if page_obj.number == num %}<span class="pg-btn current">{{ num }}</span>
+          {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}<a href="?page={{ num }}" class="pg-btn">{{ num }}</a>{% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}" class="pg-btn">›</a>{% endif %}
+      </div>
+      {% endif %}
+      {% else %}
+      <div class="empty card">
+        <div class="ei">📭</div><h3>No documents in this category</h3>
+        {% if user.is_authenticated %}<a href="{% url 'document_upload' %}" class="btn btn-primary mt-3">Upload the First</a>{% endif %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

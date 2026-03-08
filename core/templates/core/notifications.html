@@ -1,0 +1,59 @@
+{% extends 'core/base.html' %}
+{% block title %}Notifications — KnowledgeShare{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header flex items-center justify-between" style="flex-wrap:wrap;gap:14px;">
+    <div>
+      <h1 class="page-title">Notifications</h1>
+      <p class="page-sub">Activity on your documents.</p>
+    </div>
+    {% if page_obj %}
+    <form method="POST" action="{% url 'clear_notifications' %}" onsubmit="return confirm('Clear all notifications?');">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--coral);">🗑 Clear All</button>
+    </form>
+    {% endif %}
+  </div>
+
+  {% if page_obj %}
+  <div style="display:flex;flex-direction:column;gap:9px;max-width:740px;">
+    {% for n in page_obj %}
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px 18px;display:flex;align-items:center;gap:14px;{% if not n.is_read %}border-left:3px solid var(--teal);background:rgba(0,212,170,0.03);{% endif %}">
+      <div style="width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;{% if n.notification_type == 'comment' %}background:rgba(0,212,170,0.12);{% elif n.notification_type == 'removal' %}background:rgba(255,107,107,0.12);{% else %}background:rgba(79,142,247,0.12);{% endif %}">
+        {{ n.get_icon }}
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:0.9rem;color:{% if not n.is_read %}var(--text){% else %}var(--text2){% endif %};line-height:1.45;">{{ n.message }}</div>
+        <div style="font-size:0.73rem;color:var(--text3);margin-top:3px;">
+          {{ n.created_at|timesince }} ago
+          {% if not n.is_read %}<span style="margin-left:8px;background:var(--teal-dim);color:var(--teal);padding:1px 7px;border-radius:999px;font-size:0.67rem;font-weight:700;">NEW</span>{% endif %}
+        </div>
+      </div>
+      {% if n.document and n.notification_type == 'comment' %}
+      <a href="{% url 'document_detail' n.document.pk %}#comments" class="btn btn-ghost btn-sm" style="flex-shrink:0;">View →</a>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if page_obj.has_other_pages %}
+  <div class="pagination">
+    {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}" class="pg-btn">‹</a>{% endif %}
+    {% for num in page_obj.paginator.page_range %}
+      {% if page_obj.number == num %}<span class="pg-btn current">{{ num }}</span>
+      {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}<a href="?page={{ num }}" class="pg-btn">{{ num }}</a>{% endif %}
+    {% endfor %}
+    {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}" class="pg-btn">›</a>{% endif %}
+  </div>
+  {% endif %}
+
+  {% else %}
+  <div class="empty card" style="max-width:480px;">
+    <div class="ei">🔔</div>
+    <h3>All caught up!</h3>
+    <p>No notifications yet. Upload a document to get started.</p>
+    <a href="{% url 'document_list' %}" class="btn btn-secondary mt-3">Browse Documents</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
