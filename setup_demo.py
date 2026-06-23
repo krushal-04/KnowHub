@@ -10,7 +10,7 @@ django.setup()
 from django.contrib.auth.models import User
 from core.models import Category
 
-print("\n📦 Seeding KnowledgeShare...\n")
+print("\n Seeding KnowledgeShare...\n")
 
 CATEGORIES = [
     ("Study Notes",          "Academic notes, summaries, and study guides",     "📖"),
@@ -30,12 +30,12 @@ for name, desc, icon in CATEGORIES:
 
 print()
 
-# Admin
+
 if not User.objects.filter(username='admin').exists():
     User.objects.create_superuser('admin', 'admin@example.com', 'admin123')
-    print("  ✅ Admin created   → username: admin    password: admin123")
+    print("   Admin created   → username: admin    password: admin123")
 else:
-    print("  ℹ️  Admin already exists")
+    print("    Admin already exists")
 
 # Demo users
 for uname, email, pw, fname, lname in [
@@ -45,9 +45,9 @@ for uname, email, pw, fname, lname in [
 ]:
     if not User.objects.filter(username=uname).exists():
         u = User.objects.create_user(uname, email, pw, first_name=fname, last_name=lname)
-        print(f"  ✅ User created    → username: {uname:<8} password: {pw}")
+        print(f"   User created    → username: {uname:<8} password: {pw}")
     else:
-        print(f"  ℹ️  User {uname} already exists")
+        print(f"    User {uname} already exists")
 
 print("""
 ╔═══════════════════════════════════════════════╗
